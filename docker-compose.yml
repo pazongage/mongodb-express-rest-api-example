@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  mongo:
+    image: mongo:latest
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile-server
+    environment:
+      - ATLAS_URI=mongodb://mongo:27017/mydatabase
+    ports:
+      - "5050:5050"
+    depends_on:
+      - mongo
+
+  client:
+    build:
+      context: ./app
+      dockerfile: Dockerfile-client
+    ports:
+      - "3000:80"
+    depends_on:
+      - server
+
+volumes:
+  mongo-data:

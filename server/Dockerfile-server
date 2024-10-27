@@ -1,0 +1,15 @@
+FROM node:23
+
+WORKDIR /app
+
+COPY package*.json ./
+
+RUN npm install
+
+ENV NODE_OPTIONS=--openssl-legacy-provider
+
+COPY . .
+
+EXPOSE 5050
+
+CMD ["node", "index.mjs"]

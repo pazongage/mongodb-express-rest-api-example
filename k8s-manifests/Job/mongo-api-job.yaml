@@ -1,0 +1,24 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: mongo-api-job
+  namespace: my-app  # Adjust to your namespace
+spec:
+  template:
+    spec:
+      containers:
+        - name: mongo-api-job
+          image: pazf/mongo-tools-curl
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              #curl https://atlas-education.s3.amazonaws.com/sampledata.archive -o sampledata.archive
+              #mongorestore --host mongodb --archive=./sampledata.archive
+              set -x
+              #echo "id,author,title,tags,date" > ./posts.csv
+              echo "id,author,title,tags,date" > ./posts.csv
+              response=$(curl -s http://server:5050/posts)
+              echo "$response" | tr -d '\000-\031' | jq -r 'map(del(.body, .comments)) | .[] | [.["_id"], .author, .title, (.tags | join(", ")), .date] | @csv' >> ./posts.csv
+              sleep 600
+      restartPolicy: Never
+  backoffLimit: 4
